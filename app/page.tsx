@@ -66,31 +66,23 @@ export default function Home() {
           </p>
 
           <form onSubmit={handleSubmit} className="w-full mt-8">
-            <div
-              className={`flex items-center rounded-lg overflow-hidden ${shaking ? 'shake' : ''}`}
-              style={{
-                backgroundColor: 'var(--bg-surface)',
-                border: `1px solid ${error ? 'var(--heat-hot)' : 'var(--border)'}`,
-              }}
-            >
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => { setInput(e.target.value); setError('') }}
-                placeholder="github.com/owner/repo/tree/sha"
-                className="flex-1 px-4 py-3 bg-transparent outline-none text-sm"
-                style={{
-                  color: 'var(--text-primary)',
-                  fontFamily: 'var(--mono)',
-                }}
-              />
+            <div className={`flex flex-col sm:flex-row items-stretch gap-3 ${shaking ? 'shake' : ''}`}>
+              <div className="flex flex-1">
+                <span className="inline-flex items-center rounded-l-md border border-r-0 border-border/20 bg-muted px-3 text-sm text-foreground/60">
+                  https://
+                </span>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => { setInput(e.target.value); setError('') }}
+                  placeholder="github.com/owner/repo"
+                  className={`w-full rounded-r-md border bg-background px-4 py-2 text-sm text-foreground placeholder:text-foreground/50 focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20 ${error ? 'border-destructive' : 'border-border/20'}`}
+                  style={{ fontFamily: 'var(--mono)' }}
+                />
+              </div>
               <button
                 type="submit"
-                className="px-5 py-3 text-sm font-medium whitespace-nowrap cursor-pointer"
-                style={{
-                  backgroundColor: 'var(--accent)',
-                  color: '#fff',
-                }}
+                className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/80 whitespace-nowrap cursor-pointer"
               >
                 Explore →
               </button>
