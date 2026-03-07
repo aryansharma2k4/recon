@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
             churnMap,
         };
 
-        triggerRagIngest(owner, repo, sha);
+        triggerRagIngest(owner, repo, sha, enrichedTree, churnMap);
 
         return NextResponse.json(response);
     } catch (err) {
@@ -68,11 +68,17 @@ export async function GET(request: NextRequest) {
     }
 }
 
-function triggerRagIngest(owner: string, repo: string, sha: string): void {
+function triggerRagIngest(
+    owner: string,
+    repo: string,
+    sha: string,
+    tree: { path: string; type: string; size: number; sha: string; churnScore: number }[],
+    churnMap: Record<string, number>
+): void {
     fetch(`${RAG_SERVICE_URL}/ingest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ owner, repo, sha }),
+        body: JSON.stringify({ owner, repo, sha, tree, churnMap }),
     })
         .then((res) => {
             if (!res.ok) {
