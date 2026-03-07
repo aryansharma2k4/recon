@@ -78,6 +78,24 @@ type GitHubContentResponse = {
     size: number;
 };
 
+export async function getDefaultBranch(
+    owner: string,
+    repo: string
+): Promise<string> {
+    const url = `${GITHUB_API}/repos/${owner}/${repo}`;
+    const res = await fetch(url, { headers: getHeaders() });
+    checkRateLimit(res);
+
+    if (!res.ok) {
+        throw new Error(
+            `GitHub getDefaultBranch failed: ${res.status} ${res.statusText}`
+        );
+    }
+
+    const data = await res.json();
+    return data.default_branch || 'main';
+}
+
 export async function getFileTree(
     owner: string,
     repo: string,
