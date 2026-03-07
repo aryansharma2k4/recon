@@ -1,8 +1,12 @@
 import type { FileNode, Commit, CommitFile } from './types';
 
 const GITHUB_API = 'https://api.github.com';
-const MAX_FILE_SIZE = 500 * 1024; // 500 KB
+const MAX_FILE_SIZE = 500 * 1024;
+const BATCH_SIZE = 5;
 
+function getCommitLimit(): number {
+    return process.env.GITHUB_TOKEN ? 30 : 5;
+}
 
 function getHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
@@ -15,12 +19,11 @@ function getHeaders(): Record<string, string> {
     return headers;
 }
 
-
 function checkRateLimit(res: Response): void {
     const remaining = res.headers.get('x-ratelimit-remaining');
     const resetEpoch = res.headers.get('x-ratelimit-reset');
 
-    if (remaining !== null && Number(remaining) <= 10) {
+    if (remaining !== null && Number(remaining) <= 50) {
         const resetDate = resetEpoch
             ? new Date(Number(resetEpoch) * 1000).toISOString()
             : 'unknown';
@@ -29,7 +32,7 @@ function checkRateLimit(res: Response): void {
         );
     }
 
-    if (remaining === '0' && res.status === 403) {
+    if (remaining !== null && Number(remaining) === 0 && res.status === 403) {
         const resetDate = resetEpoch
             ? new Date(Number(resetEpoch) * 1000).toISOString()
             : 'unknown';
@@ -107,12 +110,34 @@ export async function getFileTree(
         }));
 }
 
+async function fetchCommitDetail(
+    owner: string,
+    repo: string,
+    sha: string
+): Promise<Commit | null> {
+    const url = `${GITHUB_API}/repos/${owner}/${repo}/commits/${sha}`;
+    const res = await fetch(url, { headers: getHeaders() });
+    checkRateLimit(res);
+
+    if (!res.ok) {
+        console.warn(`[github] Skipping commit ${sha}: ${res.status}`);
+        return null;
+    }
+
+    const detail: GitHubCommitDetail = await res.json() as GitHubCommitDetail;
+    const files: CommitFile[] = (detail.files ?? []).map((f) => ({
+        filename: f.filename,
+        status: f.status,
+    }));
+
+    return { sha: detail.sha, files };
+}
 
 export async function getCommitHistory(
     owner: string,
     repo: string
 ): Promise<Commit[]> {
-    const listUrl = `${GITHUB_API}/repos/${owner}/${repo}/commits?per_page=100`;
+    const listUrl = `${GITHUB_API}/repos/${owner}/${repo}/commits?per_page=${getCommitLimit()}`;
     const listRes = await fetch(listUrl, { headers: getHeaders() });
     checkRateLimit(listRes);
 
@@ -123,27 +148,16 @@ export async function getCommitHistory(
     }
 
     const commitList: GitHubCommitListItem[] = await listRes.json() as GitHubCommitListItem[];
-
     const commits: Commit[] = [];
 
-    for (const entry of commitList) {
-        const detailUrl = `${GITHUB_API}/repos/${owner}/${repo}/commits/${entry.sha}`;
-        const detailRes = await fetch(detailUrl, { headers: getHeaders() });
-        checkRateLimit(detailRes);
-
-        if (!detailRes.ok) {
-            console.warn(`[github] Skipping commit ${entry.sha}: ${detailRes.status}`);
-            continue;
+    for (let i = 0; i < commitList.length; i += BATCH_SIZE) {
+        const batch = commitList.slice(i, i + BATCH_SIZE);
+        const results = await Promise.all(
+            batch.map((entry) => fetchCommitDetail(owner, repo, entry.sha))
+        );
+        for (const result of results) {
+            if (result) commits.push(result);
         }
-
-        const detail: GitHubCommitDetail = await detailRes.json() as GitHubCommitDetail;
-
-        const files: CommitFile[] = (detail.files ?? []).map((f) => ({
-            filename: f.filename,
-            status: f.status,
-        }));
-
-        commits.push({ sha: detail.sha, files });
     }
 
     return commits;
