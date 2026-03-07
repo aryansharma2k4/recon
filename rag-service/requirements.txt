@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+chromadb
+sentence-transformers
+tree-sitter
+tree-sitter-language-pack
+google-generativeai
+httpx
+python-dotenv
+pydantic
