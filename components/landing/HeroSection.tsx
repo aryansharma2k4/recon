@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { parseGitHubUrl } from '@/lib/parseUrl'
+import { parseGithubUrl } from '@/lib/parseUrl'
 import { ArrowRight, Github } from 'lucide-react'
 import { GLSLHills } from '@/components/ui/glsl-hills'
 
@@ -24,7 +24,7 @@ export default function HeroSection() {
                 return
             }
 
-            const parsed = parseGitHubUrl(url)
+            const parsed = parseGithubUrl(url)
             if (!parsed) {
                 setError(
                     'Invalid URL. Use format: github.com/owner/repo/tree/branch-or-sha'

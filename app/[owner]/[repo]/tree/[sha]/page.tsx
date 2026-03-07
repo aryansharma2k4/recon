@@ -202,10 +202,10 @@ export default function ExplorerPage({ params }: PageProps) {
                         className="text-2xl font-bold mb-2"
                         style={{ color: 'var(--text-primary)' }}
                     >
-                        Could not load repository
+                        Failed to load repository
                     </h2>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                        Check that the URL is correct and the repo is public
+                    <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
+                        {treeError}
                     </p>
                 </div>
                 <button

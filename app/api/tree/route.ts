@@ -43,16 +43,19 @@ export async function GET(request: NextRequest) {
         const totalFiles = enrichedTree.filter((n) => n.type === 'blob').length;
         const totalFolders = enrichedTree.filter((n) => n.type === 'tree').length;
 
-        const response: TreeApiResponse = {
+        // Async RAG ingestion in background - errors here shouldn't break the Tree render
+        if (enrichedTree && enrichedTree.length > 0) {
+            triggerRagIngest(owner, repo, sha, enrichedTree, churnMap).catch((err) => {
+                console.error('[/api/tree] Background RAG ingest failed:', err instanceof Error ? err.message : String(err));
+            });
+        }
+
+        return NextResponse.json({
             tree: enrichedTree,
             totalFiles,
             totalFolders,
-            churnMap,
-        };
-
-        triggerRagIngest(owner, repo, sha, enrichedTree, churnMap);
-
-        return NextResponse.json(response);
+            churnMap: churnMap
+        });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Internal server error';
         console.error('[/api/tree]', message);
@@ -68,13 +71,13 @@ export async function GET(request: NextRequest) {
     }
 }
 
-function triggerRagIngest(
+async function triggerRagIngest(
     owner: string,
     repo: string,
     sha: string,
     tree: { path: string; type: string; size: number; sha: string; churnScore: number }[],
     churnMap: Record<string, number>
-): void {
+): Promise<void> {
     fetch(`${RAG_SERVICE_URL}/ingest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

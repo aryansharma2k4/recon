@@ -167,10 +167,10 @@ export default function InsightPanel({
                 }}
             >
                 <p
-                    className="text-sm"
+                    className="text-sm px-4 text-center leading-relaxed"
                     style={{ color: 'var(--text-secondary)' }}
                 >
-                    Could not load file analysis
+                    {error}
                 </p>
                 <button
                     onClick={onRetry}
