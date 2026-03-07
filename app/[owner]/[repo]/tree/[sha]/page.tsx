@@ -69,13 +69,7 @@ export default function ExplorerPage({ params }: PageProps) {
                 setTreeCache(cacheKey, data)
                 setTreeData(data.tree)
 
-                // Fire & forget prefetch for top 5 churned files
-                const top5 = data.tree
-                    .filter((f) => f.type === 'blob')
-                    .sort((a, b) => b.churnScore - a.churnScore)
-                    .slice(0, 5)
-
-                Promise.all(top5.map((f) => prefetchExplain(f.path))).catch(console.error)
+                // Removed background prefetch of top 5 files to save API limits
             } catch (err) {
                 if (!mounted) return
                 setTreeError(err instanceof Error ? err.message : 'Unknown error')
@@ -109,21 +103,7 @@ export default function ExplorerPage({ params }: PageProps) {
         [owner, repo, sha]
     )
 
-    // --- Helper: Background Prefetch ---
-    const prefetchExplain = useCallback(
-        async (filePath: string) => {
-            // Only prefetch if not in cache
-            if (getExplainCache(filePath)) return
-
-            try {
-                const data = await fetchExplain(filePath)
-                setExplainCache(filePath, data)
-            } catch (err) {
-                console.warn('Prefetch failed for', filePath, err)
-            }
-        },
-        [fetchExplain]
-    )
+    // Background prefetch explicitly disabled to save API quotas
 
     // --- Event Handlers ---
     const handleNavigate = useCallback((path: string) => {
@@ -182,12 +162,11 @@ export default function ExplorerPage({ params }: PageProps) {
     )
 
     const handleNodeHover = useCallback(
-        (path: string, type: string) => {
-            if (type === 'blob') {
-                prefetchExplain(path)
-            }
+        () => {
+            // Disabled hover prefetching to save Gemini API limits.
+            // Explain data will only fetch on explicit click.
         },
-        [prefetchExplain]
+        []
     )
 
     // --- Render Error State (Tree) ---
