@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# rag-service
+rag-service/chroma_db/
+rag-service/__pycache__/
+rag-service/*.pyc
+rag-service/.env
+rag-service/venv/
