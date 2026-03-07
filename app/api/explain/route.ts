@@ -22,11 +22,11 @@ type RagQueryResponse = {
 type FallbackResponse = {
     filePath: string;
     content: string;
-    dependencies: string[];
-    dependents: string[];
-    summary: null;
+    summary: string | null;
     read_first: string[];
+    depends_on: string[];
     used_by: string[];
+    relevant_chunks: { path: string; name: string; summary: string }[];
 };
 
 export async function POST(request: NextRequest) {
@@ -60,10 +60,13 @@ export async function POST(request: NextRequest) {
         const fallbackCtx = await assembleFileContext(owner, repo, sha, filePath);
 
         const fallback: FallbackResponse = {
-            ...fallbackCtx,
+            filePath: fallbackCtx.filePath,
+            content: fallbackCtx.content,
             summary: null,
             read_first: [],
-            used_by: [],
+            depends_on: fallbackCtx.dependencies || [],
+            used_by: fallbackCtx.dependents || [],
+            relevant_chunks: [],
         };
 
         return NextResponse.json(fallback);

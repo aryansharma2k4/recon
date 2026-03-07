@@ -233,7 +233,7 @@ export default function InsightPanel({
                 </p>
 
                 {/* Read First */}
-                {explainData.read_first.length > 0 && (
+                {explainData.read_first?.length > 0 && (
                     <>
                         <Divider />
                         <SectionLabel>Read First</SectionLabel>
@@ -257,7 +257,7 @@ export default function InsightPanel({
                 )}
 
                 {/* Depends On */}
-                {explainData.depends_on.length > 0 && (
+                {explainData.depends_on?.length > 0 && (
                     <>
                         <Divider />
                         <SectionLabel>Depends On</SectionLabel>
@@ -270,7 +270,7 @@ export default function InsightPanel({
                 )}
 
                 {/* Used By */}
-                {explainData.used_by.length > 0 && (
+                {explainData.used_by?.length > 0 && (
                     <>
                         <Divider />
                         <SectionLabel>Used By</SectionLabel>
@@ -283,7 +283,7 @@ export default function InsightPanel({
                 )}
 
                 {/* Relevant Chunks */}
-                {explainData.relevant_chunks.length > 0 && (
+                {explainData.relevant_chunks?.length > 0 && (
                     <>
                         <Divider />
                         <SectionLabel>Related Chunks</SectionLabel>
