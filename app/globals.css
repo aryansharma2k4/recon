@@ -187,3 +187,44 @@
     linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
   background-size: 60px 60px;
 }
+
+/* ─── Recon Design Tokens ─── */
+:root {
+  --bg-base: #0A0A0F;
+  --bg-surface: #13131A;
+  --bg-elevated: #1C1C27;
+  --border: #2A2A3A;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #4B5563;
+  --accent: #6366F1;
+  --accent-dim: #6366F120;
+  --heat-cold: #3B82F6;
+  --heat-warm: #F59E0B;
+  --heat-hot: #EF4444;
+  --success: #10B981;
+  --mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.skeleton {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.shake {
+  animation: shake 0.4s ease-in-out;
+}
