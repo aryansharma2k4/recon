@@ -59,10 +59,26 @@ export async function POST(request: NextRequest) {
         console.warn('[/api/explain] RAG unavailable, falling back to local context');
         const fallbackCtx = await assembleFileContext(owner, repo, sha, filePath);
 
+        let localSummary = null;
+        if (process.env.GOOGLE_API_KEY && fallbackCtx.content) {
+            try {
+                console.log('[/api/explain] Using direct Gemini API as secondary fallback for summary');
+                const { GoogleGenerativeAI } = await import('@google/generative-ai');
+                const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+                // Use flash for raw speed during fallback
+                const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+                const prompt = `Explain what this file does in 2-3 concise sentences. Keep it technical but simple. File: ${filePath}\n\nCode:\n${fallbackCtx.content.slice(0, 20000)}`;
+                const generateResult = await model.generateContent(prompt);
+                localSummary = generateResult.response.text();
+            } catch (err) {
+                console.warn('[/api/explain] Fallback summary generation failed:', err);
+            }
+        }
+
         const fallback: FallbackResponse = {
             filePath: fallbackCtx.filePath,
             content: fallbackCtx.content,
-            summary: null,
+            summary: localSummary,
             read_first: [],
             depends_on: fallbackCtx.dependencies || [],
             used_by: fallbackCtx.dependents || [],

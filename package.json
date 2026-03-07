@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
+    "@google/generative-ai": "^0.24.1",
     "@types/d3": "^7.4.3",
     "@types/three": "^0.183.1",
     "class-variance-authority": "^0.7.1",
