@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { parseGitHubUrl } from '@/lib/parseUrl'
 import { ArrowRight, Github } from 'lucide-react'
+import { GLSLHills } from '@/components/ui/glsl-hills'
 
 export default function HeroSection() {
     const [url, setUrl] = useState('')
@@ -38,24 +39,31 @@ export default function HeroSection() {
 
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-            {/* Background grid pattern */}
-            <div className="absolute inset-0 grid-pattern opacity-40" />
+            {/* GLSLHills 3D Background */}
+            <div className="absolute inset-0 z-0">
+                <GLSLHills
+                    width="100%"
+                    height="100%"
+                    cameraZ={150}
+                    speed={0.3}
+                />
+            </div>
 
-            {/* Gradient orbs */}
+            {/* Subtle gradient orbs on top for color depth */}
             <div
-                className="gradient-orb w-[600px] h-[600px] -top-48 -left-48"
-                style={{ background: 'oklch(0.55 0.2 250)' }}
+                className="gradient-orb w-[500px] h-[500px] -top-32 -left-32 z-[2]"
+                style={{ background: 'oklch(0.55 0.2 250 / 20%)' }}
             />
             <div
-                className="gradient-orb w-[500px] h-[500px] -bottom-32 -right-32"
-                style={{ background: 'oklch(0.55 0.15 280)' }}
-            />
-            <div
-                className="gradient-orb w-[300px] h-[300px] top-1/3 right-1/4"
-                style={{ background: 'oklch(0.50 0.18 320)' }}
+                className="gradient-orb w-[400px] h-[400px] -bottom-24 -right-24 z-[2]"
+                style={{ background: 'oklch(0.55 0.15 280 / 20%)' }}
             />
 
-            <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+            {/* Bottom gradient fade for smooth section transition */}
+            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent z-[3]" />
+
+            {/* Hero content */}
+            <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pointer-events-auto">
                 {/* Badge */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -160,7 +168,7 @@ export default function HeroSection() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.2 }}
-                className="absolute bottom-8 left-1/2 -translate-x-1/2"
+                className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
             >
                 <motion.div
                     animate={{ y: [0, 8, 0] }}

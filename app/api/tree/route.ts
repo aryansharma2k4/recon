@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFileTree, getCommitHistory, computeChurnScores } from '@/lib/github';
-import type { TreeResponse } from '@/lib/types';
+import type { TreeApiResponse } from '@/lib/types';
 
 const RAG_SERVICE_URL = process.env.RAG_SERVICE_URL ?? 'http://localhost:8000';
 
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
         const totalFiles = enrichedTree.filter((n) => n.type === 'blob').length;
         const totalFolders = enrichedTree.filter((n) => n.type === 'tree').length;
 
-        const response: TreeResponse = {
+        const response: TreeApiResponse = {
             tree: enrichedTree,
             totalFiles,
             totalFolders,

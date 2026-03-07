@@ -147,6 +147,9 @@ export default function TreemapPreview() {
 
     return (
         <section className="relative py-32 overflow-hidden">
+            {/* Top gradient blend from hero */}
+            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
+
             {/* Section header */}
             <div className="max-w-7xl mx-auto px-6 mb-16">
                 <motion.div
