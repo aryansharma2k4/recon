@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
         if (message.includes('rate limit')) {
             return NextResponse.json(
-                { error: 'GitHub API rate limit exceeded. Try again later.' },
+                { error: message },
                 { status: 429 }
             );
         }
@@ -104,6 +104,11 @@ async function queryRagService(
         if (res.status === 400) {
             console.warn('[rag-query] Not ingested yet, falling back');
             return null;
+        }
+
+        if (res.status === 429) {
+            console.warn('[rag-query] Rate limit exceeded');
+            throw new Error('Gemini API rate limit exceeded. Please try again later.');
         }
 
         if (!res.ok) {

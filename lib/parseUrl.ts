@@ -5,9 +5,20 @@ export function parseGithubUrl(input: string): ParsedUrl {
         let url = input.trim()
         url = url.replace(/^https?:\/\//, '')
         url = url.replace(/^github\.com\//, '')
+
+        // Remove trailing slash if present
+        url = url.replace(/\/$/, '')
+
         const parts = url.split('/')
-        if (parts.length < 4) return null
-        if (parts[2] !== 'tree') return null
+
+        if (parts.length < 2) return null
+        if (parts.length === 2) {
+            // e.g. owner/repo -> default to main
+            return { owner: parts[0], repo: parts[1], sha: 'main' }
+        }
+
+        if (parts[2] !== 'tree' || parts.length < 4) return null
+
         return { owner: parts[0], repo: parts[1], sha: parts[3] }
     } catch {
         return null
