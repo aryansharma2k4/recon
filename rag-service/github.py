@@ -12,10 +12,11 @@ from typing import Any
 
 import httpx
 from dotenv import load_dotenv
+from pathlib import Path
 
 from models import FileTreeItem
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 logger = logging.getLogger(__name__)
 

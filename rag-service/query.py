@@ -12,6 +12,7 @@ from typing import Any
 
 import google.generativeai as genai
 from dotenv import load_dotenv
+from pathlib import Path
 
 from github import get_file_content
 from embeddings import chunk_to_embed_text
@@ -19,11 +20,11 @@ from ingest import embedding_model, vector_store
 from vector_store import VectorStore
 from models import Chunk, QueryResponse
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 logger = logging.getLogger(__name__)
 
-GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "") or os.getenv("GOOGLE_API_KEY", "")
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Maximum chunks to send to the LLM
