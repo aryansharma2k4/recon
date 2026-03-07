@@ -39,33 +39,23 @@ export default function Home() {
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: 'var(--bg-base)' }}
     >
-      {/* Header */}
-      <header className="fixed top-0 left-0 px-6 py-4 z-10">
-        <span
-          className="text-base font-bold"
-          style={{ color: 'var(--accent)' }}
-        >
-          Recon
-        </span>
-      </header>
-
       {/* Center content */}
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-[560px] flex flex-col items-center">
           <h1
-            className="text-5xl font-bold tracking-tight"
+            className="text-4xl font-semibold tracking-tight"
             style={{ color: 'var(--text-primary)' }}
           >
             Recon
           </h1>
           <p
-            className="mt-3 text-lg"
+            className="mt-2 text-base"
             style={{ color: 'var(--text-secondary)' }}
           >
             Understand any codebase instantly.
           </p>
 
-          <form onSubmit={handleSubmit} className="w-full mt-8">
+          <form onSubmit={handleSubmit} className="w-full mt-10">
             <div className={`flex flex-col sm:flex-row items-stretch gap-3 ${shaking ? 'shake' : ''}`}>
               <div className="flex flex-1">
                 <span className="inline-flex items-center rounded-l-md border border-r-0 border-border/20 bg-muted px-3 text-sm text-foreground/60">
@@ -90,21 +80,13 @@ export default function Home() {
 
             {error && (
               <p
-                className="mt-2 text-xs"
+                className="mt-2 text-xs text-center"
                 style={{ color: 'var(--heat-hot)' }}
               >
                 {error}
               </p>
             )}
           </form>
-
-          <button
-            onClick={fillExample}
-            className="mt-3 text-xs cursor-pointer bg-transparent border-none"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            e.g. {EXAMPLE_URL}
-          </button>
         </div>
       </div>
     </main>
