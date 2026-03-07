@@ -13,8 +13,8 @@ export function parseGithubUrl(input: string): ParsedUrl {
 
         if (parts.length < 2) return null
         if (parts.length === 2) {
-            // e.g. owner/repo -> default to main
-            return { owner: parts[0], repo: parts[1], sha: 'main' }
+            // e.g. owner/repo -> default branch needs to be fetched
+            return { owner: parts[0], repo: parts[1], sha: '' }
         }
 
         if (parts[2] !== 'tree' || parts.length < 4) return null

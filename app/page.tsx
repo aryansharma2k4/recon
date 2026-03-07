@@ -22,7 +22,11 @@ export default function Home() {
       return
     }
     setError('')
-    router.push(`/${parsed.owner}/${parsed.repo}/tree/${parsed.sha}`)
+    if (parsed.sha === '') {
+      router.push(`/${parsed.owner}/${parsed.repo}`)
+    } else {
+      router.push(`/${parsed.owner}/${parsed.repo}/tree/${parsed.sha}`)
+    }
   }
 
   function fillExample() {

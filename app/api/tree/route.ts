@@ -24,6 +24,21 @@ export async function GET(request: NextRequest) {
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Unknown error';
             if (message.includes('404')) {
+                if (sha === 'main') {
+                    try {
+                        const { getDefaultBranch } = await import('@/lib/github');
+                        const defaultBranch = await getDefaultBranch(owner, repo);
+                        if (defaultBranch !== 'main') {
+                            return NextResponse.json(
+                                { action: 'redirect', destination: `/${owner}/${repo}/tree/${defaultBranch}` },
+                                { status: 404 }
+                            );
+                        }
+                    } catch (e) {
+                        // ignore and fall through to standard 404
+                    }
+                }
+
                 return NextResponse.json(
                     { error: `Repository not found: ${owner}/${repo}` },
                     { status: 404 }

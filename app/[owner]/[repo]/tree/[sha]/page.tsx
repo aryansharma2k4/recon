@@ -59,6 +59,17 @@ export default function ExplorerPage({ params }: PageProps) {
 
                 const res = await fetch(`/api/tree?owner=${owner}&repo=${repo}&sha=${sha}`)
                 if (!res.ok) {
+                    if (res.status === 404) {
+                        try {
+                            const errData = await res.json();
+                            if (errData.action === 'redirect' && errData.destination) {
+                                router.push(errData.destination);
+                                return;
+                            }
+                        } catch (e) {
+                            // fall through
+                        }
+                    }
                     throw new Error(`Failed to load tree: ${res.statusText}`)
                 }
 
