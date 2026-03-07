@@ -215,14 +215,7 @@ async def query_file(
     results = vector_store.search(repo_id, query_embedding, n_results=MAX_CHUNKS_FOR_LLM)
 
     if not results:
-        logger.warning("No search results found for %s", file_path)
-        return QueryResponse(
-            summary="No indexed chunks found for analysis.",
-            read_first=[],
-            depends_on=[],
-            used_by=[],
-            relevant_chunks=[],
-        )
+        logger.warning("No search results found for %s, proceeding with file-only LLM analysis", file_path)
 
     # 4. Classify chunks
     depends_on, used_by, relevant = _classify_chunks(results, target_content, file_path)

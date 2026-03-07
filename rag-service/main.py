@@ -99,11 +99,7 @@ async def query(request: QueryRequest) -> QueryResponse:
     """
     repo_id = VectorStore._repo_id(request.owner, request.repo, request.sha)
 
-    if not vector_store.exists(repo_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Repo not ingested yet. Call /ingest first.",
-        )
+    # Removed vector_store.exists() check to allow querying while the repository is still being ingested in the background.
 
     try:
         result = await query_file(
