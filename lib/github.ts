@@ -3,6 +3,23 @@ import type { FileNode, Commit, CommitFile, TimelineEvent } from './types';
 const GITHUB_API = 'https://api.github.com';
 const MAX_FILE_SIZE = 500 * 1024;
 const BATCH_SIZE = 5;
+const FETCH_TIMEOUT_MS = 10_000;
+
+async function fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    try {
+        const res = await fetch(url, { ...options, signal: controller.signal });
+        return res;
+    } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
+            throw new Error(`GitHub API request timed out after ${FETCH_TIMEOUT_MS / 1000}s: ${url}`);
+        }
+        throw err;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
 
 function getCommitLimit(): number {
     return process.env.GITHUB_TOKEN ? 30 : 5;
@@ -94,7 +111,7 @@ export async function getDefaultBranch(
     repo: string
 ): Promise<string> {
     const url = `${GITHUB_API}/repos/${owner}/${repo}`;
-    const res = await fetch(url, { headers: getHeaders() });
+    const res = await fetchWithTimeout(url, { headers: getHeaders() });
     checkRateLimit(res);
 
     if (!res.ok) {
@@ -113,7 +130,7 @@ export async function getFileTree(
     sha: string
 ): Promise<FileNode[]> {
     const url = `${GITHUB_API}/repos/${owner}/${repo}/git/trees/${sha}?recursive=1`;
-    const res = await fetch(url, { headers: getHeaders() });
+    const res = await fetchWithTimeout(url, { headers: getHeaders() });
     checkRateLimit(res);
 
     if (!res.ok) {
@@ -145,7 +162,7 @@ async function fetchCommitDetail(
     sha: string
 ): Promise<Commit | null> {
     const url = `${GITHUB_API}/repos/${owner}/${repo}/commits/${sha}`;
-    const res = await fetch(url, { headers: getHeaders() });
+    const res = await fetchWithTimeout(url, { headers: getHeaders() });
     checkRateLimit(res);
 
     if (!res.ok) {
@@ -167,7 +184,7 @@ export async function getCommitHistory(
     repo: string
 ): Promise<{ commits: Commit[], timeline: TimelineEvent[] }> {
     const listUrl = `${GITHUB_API}/repos/${owner}/${repo}/commits?per_page=${getCommitLimit()}`;
-    const listRes = await fetch(listUrl, { headers: getHeaders() });
+    const listRes = await fetchWithTimeout(listUrl, { headers: getHeaders() });
     checkRateLimit(listRes);
 
     if (!listRes.ok) {
@@ -220,7 +237,7 @@ export async function getFileContent(
     sha: string
 ): Promise<string> {
     const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${filePath}?ref=${sha}`;
-    const res = await fetch(url, { headers: getHeaders() });
+    const res = await fetchWithTimeout(url, { headers: getHeaders() });
     checkRateLimit(res);
 
     if (!res.ok) {

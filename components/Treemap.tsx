@@ -201,6 +201,9 @@ export default function Treemap({
                 const h = (leaf.y1 ?? 0) - y
                 const showLabel = w > 60 && h > 24
 
+                // Skip tiny nodes that are barely visible
+                if (w < 2 || h < 2) return null
+
                 return (
                     <div
                         key={d.path}
@@ -220,10 +223,19 @@ export default function Treemap({
                             outline: '2px solid transparent',
                         }}
                         onClick={() => handleClick(d)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault()
+                                handleClick(d)
+                            }
+                        }}
                         onMouseMove={(e) => handleMouseMove(e, d)}
                         onMouseEnter={() => handleMouseEnter(d)}
                         onMouseLeave={handleMouseLeave}
                         onFocus={() => handleMouseEnter(d)}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${d.type === 'tree' ? 'Folder' : 'File'}: ${d.name}`}
                     >
                         {showLabel && (
                             <span

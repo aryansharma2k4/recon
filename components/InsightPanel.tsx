@@ -116,7 +116,7 @@ export default function InsightPanel({
                     className="mt-1 text-xs"
                     style={{ color: 'var(--text-muted)' }}
                 >
-                    Hover files to prefetch
+                    Click a file to inspect
                 </p>
             </aside>
         )

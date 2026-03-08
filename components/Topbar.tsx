@@ -101,7 +101,7 @@ export default function Topbar({
                         fontFamily: 'var(--mono)',
                     }}
                 >
-                    @{sha.slice(0, 7)}
+                    @{sha.length <= 12 ? sha : sha.slice(0, 7)}
                 </span>
             </div>
         </header>

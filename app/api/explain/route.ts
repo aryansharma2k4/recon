@@ -50,10 +50,20 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Reject path-traversal attempts
+        if (filePath.includes('..') || filePath.startsWith('/')) {
+            return NextResponse.json(
+                { error: 'Invalid filePath' },
+                { status: 400 }
+            );
+        }
+
         const ragResult = await queryRagService(owner, repo, sha, filePath);
 
         if (ragResult) {
-            return NextResponse.json(ragResult);
+            const resp = NextResponse.json(ragResult);
+            resp.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
+            return resp;
         }
 
         console.warn('[/api/explain] RAG unavailable, falling back to local context');

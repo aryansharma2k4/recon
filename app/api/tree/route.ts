@@ -3,6 +3,7 @@ import { getFileTree, getCommitHistory, computeChurnScores } from '@/lib/github'
 import type { TreeApiResponse } from '@/lib/types';
 
 const RAG_SERVICE_URL = process.env.RAG_SERVICE_URL ?? 'http://localhost:8000';
+const SAFE_PARAM = /^[a-zA-Z0-9._-]+$/;
 
 export async function GET(request: NextRequest) {
     try {
@@ -14,6 +15,13 @@ export async function GET(request: NextRequest) {
         if (!owner || !repo || !sha) {
             return NextResponse.json(
                 { error: 'Missing required query params: owner, repo, sha' },
+                { status: 400 }
+            );
+        }
+
+        if (!SAFE_PARAM.test(owner) || !SAFE_PARAM.test(repo)) {
+            return NextResponse.json(
+                { error: 'Invalid owner or repo name' },
                 { status: 400 }
             );
         }
@@ -47,7 +55,9 @@ export async function GET(request: NextRequest) {
             throw err;
         }
 
-        const { commits, timeline } = await getCommitHistory(owner, repo);
+        const [{ commits, timeline },] = await Promise.all([
+            getCommitHistory(owner, repo),
+        ]);
         const churnMap = computeChurnScores(commits);
 
         const enrichedTree = tree.map((node) => ({
@@ -65,13 +75,16 @@ export async function GET(request: NextRequest) {
             });
         }
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             tree: enrichedTree,
             totalFiles,
             totalFolders,
             churnMap: churnMap,
-            timeline: timeline
+            timeline: timeline,
+            truncated: false,
         });
+        response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+        return response;
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Internal server error';
         console.error('[/api/tree]', message);
