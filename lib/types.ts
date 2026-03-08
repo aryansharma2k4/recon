@@ -19,11 +19,21 @@ export type ParsedUrl = {
     sha: string
 } | null
 
+export type TimelineEvent = {
+    sha: string
+    url: string
+    message: string
+    authorName: string
+    authorAvatar: string
+    date: string
+}
+
 export type TreeApiResponse = {
     tree: FileNode[]
     totalFiles: number
     totalFolders: number
     churnMap: Record<string, number>
+    timeline: TimelineEvent[]
 }
 
 export type CommitFile = {

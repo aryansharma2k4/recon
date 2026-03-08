@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
-import type { FileNode, ExplainResponse, TreeResponse } from '@/lib/types'
+import type { FileNode, ExplainResponse, TreeResponse, TimelineEvent } from '@/lib/types'
 import {
     getTreeCache,
     setTreeCache,
@@ -13,6 +13,7 @@ import {
 import Topbar from '@/components/Topbar'
 import Treemap from '@/components/Treemap'
 import InsightPanel from '@/components/InsightPanel'
+import CommitTimeline from '@/components/CommitTimeline'
 
 type PageProps = {
     params: Promise<{
@@ -32,6 +33,7 @@ export default function ExplorerPage({ params }: PageProps) {
     const [currentPath, setCurrentPath] = useState<string>('')
     const [selectedPath, setSelectedPath] = useState<string | null>(null)
     const [explainData, setExplainData] = useState<ExplainResponse | null>(null)
+    const [timelineData, setTimelineData] = useState<TimelineEvent[]>([])
 
     // Loading & Error states
     const [loadingTree, setLoadingTree] = useState(true)
@@ -49,6 +51,7 @@ export default function ExplorerPage({ params }: PageProps) {
             const cached = getTreeCache(cacheKey)
             if (cached) {
                 setTreeData(cached.tree)
+                if (cached.timeline) setTimelineData(cached.timeline)
                 setLoadingTree(false)
                 return
             }
@@ -79,6 +82,7 @@ export default function ExplorerPage({ params }: PageProps) {
                 // Save to cache
                 setTreeCache(cacheKey, data)
                 setTreeData(data.tree)
+                if (data.timeline) setTimelineData(data.timeline)
 
                 // Removed background prefetch of top 5 files to save API limits
             } catch (err) {
@@ -262,6 +266,8 @@ export default function ExplorerPage({ params }: PageProps) {
                     onRetry={() => selectedPath && handleFileClick(selectedPath)}
                 />
             </div>
+
+            <CommitTimeline timeline={timelineData} />
         </main>
     )
 }

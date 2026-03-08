@@ -1,4 +1,4 @@
-import type { FileNode, Commit, CommitFile } from './types';
+import type { FileNode, Commit, CommitFile, TimelineEvent } from './types';
 
 const GITHUB_API = 'https://api.github.com';
 const MAX_FILE_SIZE = 500 * 1024;
@@ -61,6 +61,17 @@ type GitHubTreeResponse = {
 type GitHubCommitListItem = {
     sha: string;
     url: string;
+    html_url: string;
+    commit: {
+        message: string;
+        author: {
+            name: string;
+            date: string;
+        };
+    };
+    author?: {
+        avatar_url: string;
+    };
 };
 
 type GitHubCommitDetail = {
@@ -154,7 +165,7 @@ async function fetchCommitDetail(
 export async function getCommitHistory(
     owner: string,
     repo: string
-): Promise<Commit[]> {
+): Promise<{ commits: Commit[], timeline: TimelineEvent[] }> {
     const listUrl = `${GITHUB_API}/repos/${owner}/${repo}/commits?per_page=${getCommitLimit()}`;
     const listRes = await fetch(listUrl, { headers: getHeaders() });
     checkRateLimit(listRes);
@@ -167,6 +178,14 @@ export async function getCommitHistory(
 
     const commitList: GitHubCommitListItem[] = await listRes.json() as GitHubCommitListItem[];
     const commits: Commit[] = [];
+    const timeline: TimelineEvent[] = commitList.map((item) => ({
+        sha: item.sha,
+        url: item.html_url,
+        message: item.commit.message,
+        authorName: item.commit.author.name,
+        authorAvatar: item.author?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.commit.author.name)}&background=random`,
+        date: item.commit.author.date,
+    }));
 
     for (let i = 0; i < commitList.length; i += BATCH_SIZE) {
         const batch = commitList.slice(i, i + BATCH_SIZE);
@@ -178,7 +197,7 @@ export async function getCommitHistory(
         }
     }
 
-    return commits;
+    return { commits, timeline };
 }
 
 export function computeChurnScores(commits: Commit[]): Record<string, number> {

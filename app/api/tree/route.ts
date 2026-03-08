@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
             throw err;
         }
 
-        const commits = await getCommitHistory(owner, repo);
+        const { commits, timeline } = await getCommitHistory(owner, repo);
         const churnMap = computeChurnScores(commits);
 
         const enrichedTree = tree.map((node) => ({
@@ -69,7 +69,8 @@ export async function GET(request: NextRequest) {
             tree: enrichedTree,
             totalFiles,
             totalFolders,
-            churnMap: churnMap
+            churnMap: churnMap,
+            timeline: timeline
         });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Internal server error';
